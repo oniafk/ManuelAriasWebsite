@@ -1,26 +1,127 @@
 @import "tailwindcss";
 
+@theme {
+  --color-void: #000000;
+  --color-surface: #0e0e0e;
+  --color-container-low: #131313;
+  --color-container-high: #1f1f1f;
+  --color-container-highest: #282828;
+
+  --color-primary: #00ffff;
+  --color-primary-dim: #009999;
+  --color-secondary: #ff51fa;
+  --color-secondary-dim: #993096;
+  --color-tertiary: #cafd00;
+  --color-tertiary-dim: #799800;
+
+  --color-on-dark: #ffffff;
+  --color-on-dark-dim: rgba(255, 255, 255, 0.6);
+  --color-on-primary: #000000;
+
+  --color-ghost-border: rgba(255, 255, 255, 0.1);
+  --color-variant-border: rgba(255, 255, 255, 0.2);
+
+  --font-orbitron: var(--font-orbitron);
+  --font-space: var(--font-space);
+  --font-mono: var(--font-mono);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  background-color: var(--color-void);
+  color: var(--color-on-dark);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Custom Bloom Utilities */
+@utility cyan-bloom {
+  box-shadow: 0px 0px 15px 2px rgba(0, 255, 255, 0.3), inset 0px 0px 4px 1px rgba(0, 255, 255, 0.3);
+}
+
+@utility magenta-bloom {
+  box-shadow: 0px 0px 15px 2px rgba(255, 81, 250, 0.3), inset 0px 0px 4px 1px rgba(255, 81, 250, 0.3);
+}
+
+@utility lime-bloom {
+  box-shadow: 0px 0px 15px 2px rgba(202, 253, 0, 0.3), inset 0px 0px 4px 1px rgba(202, 253, 0, 0.3);
+}
+
+@keyframes brutalist-entry {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) skewY(5deg) scaleY(1.5);
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-10px) skewY(-2deg) scaleY(0.8);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  40% {
+    transform: translateY(5px) skewY(1deg) scaleY(1.1);
+  }
+  100% {
+    transform: translateY(0) skewY(0) scaleY(1);
+    opacity: 1;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@utility animate-brutalist {
+  opacity: 0; /* starts hidden */
+  animation: brutalist-entry 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+/* 
+  ========================================
+  BROKEN NEON TEXT EFFECTS (ZONE E)
+  ========================================
+*/
+
+@keyframes flicker {
+	0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+		/* text-shadow: none; */
+    opacity: .99;
+	}
+	20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+		opacity: 0.4;
+	}
+}
+
+@utility flicker-slow {
+  animation: flicker 3s linear infinite;
+}
+
+@utility flicker-fast {
+  animation: flicker 1s linear infinite;
+}
+
+@utility neon-magenta {
+  color: #FFD5FF;
+  /* Deep intense glowing shadow translated from Codepen logic into Brutalist palette */
+  text-shadow: 
+    1px 0px 4px #FFD5FF, 
+    2px 0px 4px #FFD5FF, 
+    3px 0px 4px #FFD5FF, 
+    2px 0px 3px var(--color-secondary), 
+    2px 3px 15px var(--color-secondary), 
+    2px 0px 15px var(--color-secondary), 
+    5px 0px 125px var(--color-secondary), 
+    20px 0vw 200px var(--color-secondary),
+    40px 0vw 200px var(--color-secondary);
+}
+
+@utility box-neon-magenta {
+  border-color: #FFD5FF;
+  box-shadow: 
+    0px 0px 4px #FFD5FF, 
+    0px 0px 10px #FFD5FF, 
+    0px 0px 20px var(--color-secondary), 
+    0px 0px 40px var(--color-secondary), 
+    0px 0px 80px var(--color-secondary), 
+    inset 0px 0px 15px var(--color-secondary);
 }
