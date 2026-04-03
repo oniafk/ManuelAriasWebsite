@@ -29,7 +29,7 @@ export default function WebGLCanvas() {
         width: '100vw',
         height: '100vh',
         pointerEvents: 'none',
-        zIndex: 1,
+        zIndex: 10,
         overflow: 'hidden',
       }}
     >

@@ -181,3 +181,12 @@ body {
   animation: crt-blink 500ms linear infinite;
   display: inline-block;
 }
+
+/* ASCII Glitch Ripple Hover */
+.as {
+  cursor: crosshair;
+  user-select: none;
+}
+.as::selection {
+  background: transparent;
+}
