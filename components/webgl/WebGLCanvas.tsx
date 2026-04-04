@@ -12,10 +12,12 @@ export default function WebGLCanvas() {
     if (sceneRef.current) return;
 
     sceneRef.current = new WebGLScene(canvasRef.current);
+    (window as any).WebGLSceneInstance = sceneRef.current;
 
     return () => {
       sceneRef.current?.dispose();
       sceneRef.current = null;
+      (window as any).WebGLSceneInstance = null;
     };
   }, []);
 
