@@ -5,6 +5,8 @@ import cubeRaymarchVert from "./shaders/cube-raymarch.vert";
 import cubeRaymarchFrag from "./shaders/cube-raymarch.frag";
 import videoFrag from "./shaders/video.frag";
 import pixelRevealFrag from "./shaders/pixel-reveal.frag";
+import contactHelmetVert from "./shaders/contact-helmet.vert";
+import contactHelmetFrag from "./shaders/contact-helmet.frag";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -103,6 +105,12 @@ export class WebGLScene {
   private globalMouse = new THREE.Vector2(0, 0);
   private helmetComposer: EffectComposer | null = null;
 
+  // ─── Contact helmet (ZoneE, text-mask shader, no post-processing) ───
+  private sceneContact: THREE.Scene | null = null;
+  private contactHelmetGroup: THREE.Group | null = null;
+  private contactTextMaskTexture: THREE.Texture | null = null;
+  private contactHelmetMaterial: THREE.ShaderMaterial | null = null;
+
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.init();
@@ -192,6 +200,9 @@ export class WebGLScene {
     }
     this.helmetComposer.addPass(outputPass);
 
+    // ---- CONTACT HELMET SCENE (No post-processing) ----
+    this.sceneContact = new THREE.Scene();
+
     this.onResize();
     this.addRaymarchCube();
     this.addVideoBackground();
@@ -250,6 +261,8 @@ export class WebGLScene {
 
     // Static canvas offset — just centers the padding around the viewport
     this.canvas.style.transform = `translateY(${-this.viewportHeight * PADDING}px)`;
+
+    this.updateHelmetScales();
   };
 
   // ═══════════════════════════════════════════════════════════════
@@ -410,7 +423,70 @@ export class WebGLScene {
       if (this.helmetGroup) {
         this.helmetGroup.add(gltf.scene);
       }
+
+      // Clone for Contact Helmet (ZoneE)
+      this.setupContactHelmet(gltf.scene);
+
+      // Apply responsive scale for initial load
+      this.updateHelmetScales();
     });
+  }
+
+  private getHelmetScale(): number {
+    const w = this.viewportWidth;
+    if (w >= 1080) return 1.0;
+    if (w >= 640) return 0.75;
+    return 0.55;
+  }
+
+  private updateHelmetScales() {
+    const s = this.getHelmetScale();
+    if (this.helmetGroup) this.helmetGroup.scale.setScalar(s);
+    if (this.contactHelmetGroup) this.contactHelmetGroup.scale.setScalar(s);
+  }
+
+  private setupContactHelmet(sourceModel: THREE.Object3D) {
+    if (!this.sceneContact) return;
+
+    // Clone — geometry is shared by reference (no extra GPU vertex memory)
+    const clone = sourceModel.clone(true);
+
+    // Load the text mask texture with RepeatWrapping (UVs exceed [0,1])
+    const textureLoader = new THREE.TextureLoader();
+    this.contactTextMaskTexture = textureLoader.load("/ContactMe.png");
+    this.contactTextMaskTexture.wrapS = THREE.RepeatWrapping;
+    this.contactTextMaskTexture.wrapT = THREE.RepeatWrapping;
+    this.contactTextMaskTexture.minFilter = THREE.LinearFilter;
+    this.contactTextMaskTexture.magFilter = THREE.LinearFilter;
+
+    // Create the custom ShaderMaterial
+    this.contactHelmetMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uTextMask: { value: this.contactTextMaskTexture },
+        uTime: { value: 0 },
+      },
+      vertexShader: contactHelmetVert,
+      fragmentShader: contactHelmetFrag,
+      transparent: true,
+    });
+
+    // Traverse the clone and replace every mesh material
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (Array.isArray(mesh.material)) {
+          mesh.material.forEach((m) => m.dispose());
+        } else {
+          mesh.material.dispose();
+        }
+        mesh.material = this.contactHelmetMaterial!;
+      }
+    });
+
+    // Wrap in a group for independent positioning
+    this.contactHelmetGroup = new THREE.Group();
+    this.contactHelmetGroup.add(clone);
+    this.sceneContact.add(this.contactHelmetGroup);
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -656,17 +732,45 @@ export class WebGLScene {
       }
     }
 
+    // ── Contact Helmet (ZoneE) Position Sync + Auto-Rotation ────
+    if (this.contactHelmetGroup) {
+      const contactSection = document.getElementById("contact");
+      if (contactSection) {
+        const rect = contactSection.getBoundingClientRect();
+
+        const centerX = rect.left + rect.width * 0.5;
+        const centerY = rect.top + rect.height * 0.5;
+
+        this.contactHelmetGroup.position.x = centerX - this.viewportWidth / 2;
+        this.contactHelmetGroup.position.y = -(centerY - this.viewportHeight / 2);
+
+        // Slow auto-rotate counter to texture scroll direction
+        this.contactHelmetGroup.rotation.y = Math.PI + elapsed * 0.15;
+      }
+    }
+
+    // Update contact helmet shader time
+    if (this.contactHelmetMaterial) {
+      this.contactHelmetMaterial.uniforms.uTime.value = elapsed;
+    }
+
     // ── Render Multi-Scene ──────────────────────────────────────
     this.renderer.autoClear = false;
     this.renderer.clear();
-    
+
     // Pass 1: Orthographic 2D DOM elements
     this.renderer.render(this.scene, this.camera);
-    
+
     // Pass 2: True 3D Perspective overlay via filtered Composer
     if (this.helmetComposer) {
       this.renderer.clearDepth(); // Prevent UI depths from overlapping
       this.helmetComposer.render();
+    }
+
+    // Pass 3: Contact helmet (text-mask shader, no post-processing)
+    if (this.sceneContact && this.camera3D) {
+      this.renderer.clearDepth();
+      this.renderer.render(this.sceneContact, this.camera3D);
     }
   };
 
@@ -713,6 +817,22 @@ export class WebGLScene {
 
     this.removeVideoBackground();
     this.removeRaymarchCube();
+
+    // Contact helmet cleanup (do NOT dispose geometry — shared with ZoneC)
+    if (this.contactHelmetMaterial) {
+      this.contactHelmetMaterial.dispose();
+      this.contactHelmetMaterial = null;
+    }
+    if (this.contactTextMaskTexture) {
+      this.contactTextMaskTexture.dispose();
+      this.contactTextMaskTexture = null;
+    }
+    if (this.contactHelmetGroup && this.sceneContact) {
+      this.sceneContact.remove(this.contactHelmetGroup);
+      this.contactHelmetGroup = null;
+    }
+    this.sceneContact = null;
+
     this.sharedGeometry.dispose();
     this.renderer.dispose();
   }

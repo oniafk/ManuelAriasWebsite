@@ -1,6 +1,8 @@
 export default function ZoneE() {
   return (
     <section id="contact" className="relative w-full min-h-screen pt-[58px] bg-transparent flex flex-col border-t border-variant-border">
+      {/* 3D Contact Helmet Anchor */}
+      <div id="contact-helmet-anchor" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 pointer-events-none" />
       {/* Grid of 2 Columns */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 w-full">
         
