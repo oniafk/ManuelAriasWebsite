@@ -4,12 +4,12 @@ import { useEffect, useRef } from 'react';
 
 // Random images from picsum for demonstration
 const PROJECT_IMAGES = [
-  'https://picsum.photos/800/600?random=1',
-  'https://picsum.photos/800/600?random=2',
-  'https://picsum.photos/800/600?random=3',
-  'https://picsum.photos/800/600?random=4',
-  'https://picsum.photos/800/600?random=5',
-  'https://picsum.photos/800/600?random=6',
+  '/projects/architectureWebsite.webp',
+  '/projects/skateWebsite.webp',
+  '/projects/canonWebsite.webp',
+  '/projects/criptoWebsite.webp',
+  '/projects/doctorWebsite.webp',
+  '/projects/nikeWebsite.webp',
 ];
 
 interface Project {
@@ -94,12 +94,12 @@ function ProjectCard({ p, index, isOdd }: { p: Project, index: number, isOdd: bo
 
 export default function ZoneD() {
   const projects: Project[] = [
-    { id: '01', title: 'PROJECT_ONE', tags: ['HTML', 'CSS'] },
-    { id: '02', title: 'PROJECT_TWO', tags: ['JS', 'WEBGL'] },
-    { id: '03', title: 'KINETIC_FLOW_PROTOCOL', tags: ['WEBGL', 'RUST', 'WASM'] },
-    { id: '04', title: 'SYNTH_OS_INTERFACE', tags: ['UNREAL', 'SWIFT', 'METAL'] },
-    { id: '05', title: 'MAGMA_CORE_NODE', tags: ['GO', 'K8S', 'PROMETHEUS'] },
-    { id: '06', title: 'VOID_ZERO_SYSTEM', tags: ['TYPESCRIPT', 'NEXT.JS', 'TAILWIND'] },
+    { id: '01', title: 'LUMINA_ARCHITECTURE', tags: ['THREEJS', 'HTML', 'TAILWIND', 'TYPESCRIPT', 'WEBGL', 'NEXTJS'] },
+    { id: '02', title: 'SUBURBIA_SKATE_SHOP', tags: ['THREEJS', 'HTML', 'TAILWIND', 'TYPESCRIPT', 'PRISMA', 'EXPRESS', 'NEXTJS'] },
+    { id: '03', title: 'CANON', tags: ['VITEJS', 'HTML', 'TAILWIND', 'TYPESCRIPT', 'THREEJS', 'REACT'] },
+    { id: '04', title: 'CRIPTO_WEBSITE', tags: ['VITEJS', 'HTML', 'TAILWIND', 'TYPESCRIPT', 'THREEJS'] },
+    { id: '05', title: 'CARE_PLUS', tags: ['HTML', 'TAILWIND', 'TYPESCRIPT', 'RADIX', 'TANSTACK', 'ZOD', 'NEXT'] },
+    { id: '06', title: 'NIKE', tags: ['HTML', 'TAILWIND', 'JAVASCRIPT'] },
   ];
 
   return (

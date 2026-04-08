@@ -60,7 +60,7 @@ export default function RootLayout({
         <link href="https://fonts.cdnfonts.com/css/porter-sans-block" rel="stylesheet" />
         <link href="https://fonts.cdnfonts.com/css/post-no-bills-colombo" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col font-mono bg-void text-on-dark m-0 p-0 selection:bg-primary selection:text-on-primary">
+      <body className="min-h-full flex flex-col font-mono bg-void text-on-dark m-0 p-0 overflow-x-hidden overflow-y-auto selection:bg-primary selection:text-on-primary relative w-full max-w-full">
         {children}
       </body>
     </html>
